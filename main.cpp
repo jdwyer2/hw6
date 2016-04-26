@@ -14,44 +14,64 @@ int some_function(int val);
 
 int main()
 {
-    int * myArr;
+    int  myArr[65000];
     int M = 65000;//file_length("everybodys_social.txt");
     int index;
-    myArr = new int[M];
-    read_file("everbodys_social.txt", myArr);
+    //myArr = new int[M];
+    read_file("everybodys_socials.txt", myArr);
     int * hash_table;
     hash_table = new int[M];
 
 
-    for(int i=0;i<M;i++)    //initialize the hash table to contain 0s
+    for(int i=0;i<M;i++)
+    {
         hash_table[i]=0;
+    }
+    int my_int;
+    while(!(my_int < 450000000 && my_int > 0))
+    {
+    cout<<"Enter a number between 1 and 450,000,000: ";
+    cin>>my_int;
+    }
 
     for (int i = 0; i < M; i++)
     {
+        //cout<<myArr[i]<<endl;
         index = some_function(myArr[i]);
+
         if (hash_table[index] == 0)
         {
-            hash_table[some_function(myArr[i])] = myArr[i];
+            hash_table[index] = myArr[i];
         }
         else
         {
-            cout << "COLLISION! Fear not... I'll resolve it!\n";
-            cout<<"\n"<<quadratic_probe(myArr[i], hash_table, M);
+            //cout << "COLLISION! Fear not... I'll resolve it!\n";
+            quadratic_probe(myArr[i], hash_table, my_int/*M*/);
         }
     }
-    for (int i = 0; i < 100; i++)
+    ofstream out;
+    out.open("hashed_socials.txt");
+    for (int i = 0; i <M; i++)
     {
-        cout<<myArr[i]<<" "<< hash_table[some_function(myArr[i])]<<endl;
+        if (i != 64999)
+        {
+            out<<hash_table[i]<<",";
+        }
+        else
+        {
+            out<<hash_table[i];
+        }
     }
+    out.clear();
+    out.close();
 }
-
 int some_function(int val)
 {
     int third, fifth, seventh, eighth;
-    eighth = val % 100;
-    seventh = val % 1000;
-    fifth = val % 100000;
-    third = val % 10000000;
+    eighth = (val % 100)/10;
+    seventh = (val % 1000)/100;
+    fifth = (val % 100000)/10000;
+    third = (val % 10000000)/1000000;
     char * e = new char [1];
     char * s = new char [1];
     char * f = new char [1];
@@ -70,6 +90,7 @@ int some_function(int val)
 bool read_file(char * file_name,int w[])
 {
     int i = 0;
+    //char comma = ',';
     ifstream in;
     in.open(file_name);
     if(!in.is_open()) return false;
@@ -77,11 +98,8 @@ bool read_file(char * file_name,int w[])
     int s_word;
     while(in.peek()!=EOF)
     {
-        in.getline(word,100,' ');
+        in.getline(word,100,',');
         s_word=atoi(word);
-        //s_word=(int)word;
-        //w.push_back(s_word);
-        //w.push_back(word);
         w[i] = s_word;
         i++;
     }
@@ -105,13 +123,15 @@ int file_length(char * file_name)
     in.close();
     return count;
 }
-bool quadratic_probe(int key, int *& hash_table, int M)
-{
-    int pos = some_function(key) + 1;
-    int i = 1;
-   while (hash_table[pos] != 0)
-   {
-       pos = (pos + (i *i)) % M;
-       i++;
-   }
+
+bool quadratic_probe(int key, int *& hash_table, int M) {
+    int pos;
+    pos = some_function(key);
+    for(int i= (pos+(i*i)%M); i != pos; i++){
+        if (hash_table[i] == 0) {
+            hash_table[i] = key;
+            return true;
+        }
+    }
+    return false;
 }
